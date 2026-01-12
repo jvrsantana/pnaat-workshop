@@ -66,6 +66,55 @@
         };
 
         // --- O SEGREDO ESTÁ AQUI: LÓGICA DE LEITURA ---
+        
+        client.onMessageArrived = (message) => {
+            const rawPayload = message.payloadString;
+            console.log("Recebido bruto:", rawPayload);
+        
+            try {
+                // Tenta interpretar como JSON
+                const data = JSON.parse(rawPayload);
+        
+                // Validação básica de campos esperados
+                if (typeof data.deviceId === 'string' && ('hr_bpm' in data)) {
+                    const nome = data.deviceId;             // ex.: "nano-001"
+                    const valor = Number(data.hr_bpm);      // ex.: 80
+        
+                    if (!Number.isNaN(valor)) {
+                        updateCard(nome, valor);
+                    } else {
+                        console.warn("Campo hr_bpm não é numérico:", data.hr_bpm);
+                    }
+                } else {
+                    console.warn("JSON não contém os campos esperados (deviceId, hr_bpm):", data);
+                }
+        
+            } catch (e) {
+                console.error("Falha ao fazer parse do payload como JSON. Conteúdo:", rawPayload, e);
+        
+                // --- Fallback opcional: caso antigas mensagens cheguem em formato 'monitor1/fc/155' ---
+                try {
+                    let cleanData = rawPayload.replace(/[{"}]/g, "");
+                    let parts = cleanData.split('/');
+        
+                    if (parts.length >= 3) {
+                        const nome = parts[0];
+                        const valor = Number(parts[2]);
+        
+                        if (!Number.isNaN(valor)) {
+                            updateCard(nome, valor);
+                        } else {
+                            console.warn("Valor não numérico no formato antigo:", parts[2]);
+                        }
+                    } else {
+                        console.warn("Formato inesperado (nem JSON nem legacy):", rawPayload);
+                    }
+                } catch (e2) {
+                    console.error("Erro ao processar fallback legacy:", e2);
+                }
+            }
+        };
+
         client.onMessageArrived = (message) => {
             const rawPayload = message.payloadString;
             console.log("Recebido br uto: " + rawPayload);
