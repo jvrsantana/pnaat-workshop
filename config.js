@@ -6,8 +6,8 @@
 window.DASHBOARD_CONFIG = {
   mqttUrl: 'wss://d21541ee50b24da2bc981ecbbce1478b.s1.eu.hivemq.cloud:8884/mqtt',
   options: {
-    username: '<workshop>',
-    password: '<Workshop1>',
+    username: 'workshop',
+    password: 'Workshop1',
     clientId: 'hrdash-' + Math.random().toString(16).slice(2, 10),
     keepalive: 30,
     reconnectPeriod: 2000,
