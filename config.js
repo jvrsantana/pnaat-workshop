@@ -1,4 +1,3 @@
-// config.js
 window.DASHBOARD_CONFIG = {
   // Secure WebSocket (mandatory on GitHub Pages / HTTPS)
   mqttUrl: 'wss://<your-cluster-host>:8884/mqtt',
