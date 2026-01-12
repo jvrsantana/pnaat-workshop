@@ -4,56 +4,38 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MQTT Dashboard</title>
-  styles.css
-  <!-- MQTT.js (browser build) -->
-  <script srckg.com/mqtt/dist/mqtt.min.js</script>
-  <!-- Chart.js -->
-  https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js</script>
+  <title>Heart Rate Dashboard</title>
+  <link rel="stylesheet".js browser bundle -->
+  https://unpkg.com/mqtt/dist/mqtt.min.js</script>
 </head>
 <body>
   <header>
-    <h1>MQTT Dashboard</h1>
-    <div id="status">Disconnected</div>
+    <h1>Heart Rate Dashboard</h1>
+    <div class="conn">
+      <span id="status">Disconnected</span>
+      <button id="connectBtn">Connect</button>
+      <button id="disconnectBtn" disabled>Disconnect</button>
+    </div>
   </header>
 
-  <section class="connect">
-    <label>Client ID:
-      <input id="clientId" type="text" value="">
-    </label>
-    <button id="connectBtn">Connect</button>
-    <button id="disconnectBtn" disabled>Disconnect</button>
+  <section class="info">
+    <div>
+      <strong>Broker:</strong> <code id="brokerInfo"></code>
+    </div>
+    <div>
+      <strong>Topic:</strong> <code id="topicInfo"></code>
+    </div>
   </section>
 
-  <section class="subs">
-    <h2>Subscribe</h2>
-    <label>Topic:
-      <input id="subTopic" type="text" value="joao/health/heart_rate">
-    </label>
-    <button id="subBtn" disabled>Subscribe</button>
-    <ul id="messages"></ul>
-  </section>
+  <main id="grid" class="grid"></main>
 
-  <section class="chart">
-    <h2>Heart Rate</h2>
-    <canvas id="hrChart" height="120"></canvas>
-  </section>
+  <footer>
+    <small>
+      Tip: publish retained messages so tiles show last values on reload.  
+      Payload expected: <code>{"id":"station01","bpm":76}</code>
+    </small>
+  </footer>
 
-  <section class="pub">
-    <h2>Publish</h2>
-    <label>Topic:
-      <input id="pubTopic" type="text" value="joao/cmd/led">
-    </label>
-    <label>Message:
-      <input id="pubPayload" type="text" value="on">
-    </label>
-    <button id="pubBtn" disabled>Publish</button>
-  </section>
-
-  <!-- Your broker + credentials -->
   config.js</script>
-  <!-- App logic -->
-  app.js</script>
-</body>
+  <script src="app.jsody>
 </html>
-
