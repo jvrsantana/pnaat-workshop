@@ -126,13 +126,13 @@
                 // Resultado: monitor1/fc/155
 
                 // Agora separamos por barras /
-                let parts = cleanData.split('/'); 
+                let parts = cleanData.split(','); 
                 // Resultado: ['monitor1', 'fc', '155']
 
                 // Verificação de segurança
                 if (parts.length >= 3) {
                     const nome = parts[0]; // monitor1
-                    const valor = parts[2]; // 155
+                    const valor = parts[1]; // 155
                     
                     updateCard(nome, valor);
                 } else {
