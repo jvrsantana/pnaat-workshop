@@ -5,38 +5,33 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Heart Rate Dashboard</title>
-  <link rel="stylesheet".js browser bundle -->
+  styles.css
+  <!-- MQTT.js (browser build) -->
   https://unpkg.com/mqtt/dist/mqtt.min.js</script>
 </head>
 <body>
   <header>
     <h1>Heart Rate Dashboard</h1>
     <div class="conn">
-      <span id="status">Disconnected</span>
-      <button id="connectBtn">Connect</button>
-      <button id="disconnectBtn" disabled>Disconnect</button>
+      <span id="status">Initializing…</span>
     </div>
   </header>
 
   <section class="info">
-    <div>
-      <strong>Broker:</strong> <code id="brokerInfo"></code>
-    </div>
-    <div>
-      <strong>Topic:</strong> <code id="topicInfo"></code>
-    </div>
+    <div><strong>Broker:</strong> <code id="brokerInfo"></code></div>
+    <div><strong>Topic:</strong> <code id="topicInfo"></code></div>
   </section>
 
   <main id="grid" class="grid"></main>
 
   <footer>
     <small>
-      Tip: publish retained messages so tiles show last values on reload.  
-      Payload expected: <code>{"id":"station01","bpm":76}</code>
+      Tip: publish retained messages so tiles show last values on reload.
+      Payload expected: <code>{"deviceId":"nano-001","hr_bpm":77}</code>
     </small>
   </footer>
 
+  <!-- Config and app -->
   config.js</script>
-  app.js</script>
   <script src="app.jsody>
 </html>
