@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Heart Rate Dashboard</title>
 
-  <!-- CSS -->
+  <!-- Load CSS -->
   styles.css
 
-  <!-- MQTT.js (browser build) -->
+  <!-- Load MQTT.js (browser build) -->
   https://unpkg.com/mqtt/dist/mqtt.min.js</script>
 </head>
 <body>
@@ -31,11 +31,13 @@
     </small>
   </footer>
 
-  <!-- Order matters: config first, then app -->
-  <scriptg.js</script>
-  ./app.js</script>
+  <!-- LOAD CONFIG FIRST -->
+  config.js</script>
 
-  <!-- Inline smoke test (shows Broker/Topic if config.js loaded) -->
+  <!-- THEN LOAD THE APP -->
+  app.js</script>
+
+  <!-- Smoke test -->
   <script>
     console.log('DASHBOARD_CONFIG =', window.DASHBOARD_CONFIG);
     const brokerInfoEl = document.getElementById('brokerInfo');
