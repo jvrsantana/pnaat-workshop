@@ -5,12 +5,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Heart Rate Dashboard</title>
-
-  <!-- CSS -->
   styles.css
-
-  <!-- MQTT.js (browser build) -->
-  <script src="httpsmqtt/dist/mqtt.min.js</script>
+  <script srckg.com/mqtt/dist/mqtt.min.js</script>
 </head>
 <body>
   <header>
@@ -32,11 +28,11 @@
     </small>
   </footer>
 
-  <!-- Load your configuration and app logic (order matters: config first) -->
+  <!-- Order matters: config first, then app -->
   config.js</script>
   app.js</script>
 
-  <!-- Inline smoke test (helps confirm config.js loaded) -->
+  <!-- Smoke test -->
   <script>
     console.log('DASHBOARD_CONFIG =', window.DASHBOARD_CONFIG);
     const brokerInfoEl = document.getElementById('brokerInfo');
