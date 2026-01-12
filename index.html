@@ -1,51 +1,11 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Heart Rate Dashboard</title>
-  styles.css
-  <script srckg.com/mqtt/dist/mqtt.min.js</script>
+  <meta charset="utf-8">
+  <title>Smoke Test</title>
 </head>
 <body>
-  <header>
-    <h1>Heart Rate Dashboard</h1>
-    <div class="conn"><span id="status">Initializing…</span></div>
-  </header>
-
-  <section class="info">
-    <div><strong>Broker:</strong> <code id="brokerInfo"></code></div>
-    <div><strong>Topic:</strong> <code id="topicInfo"></code></div>
-  </section>
-
-  <main id="grid" class="grid"></main>
-
-  <footer>
-    <small>
-      Tip: publish retained messages so tiles show last values on reload.
-      Payload expected: <code>{"deviceId":"nano-001","hr_bpm":77}</code>
-    </small>
-  </footer>
-
-  <!-- Order matters: config first, then app -->
-  config.js</script>
-  app.js</script>
-
-  <!-- Smoke test -->
-  <script>
-    console.log('DASHBOARD_CONFIG =', window.DASHBOARD_CONFIG);
-    const brokerInfoEl = document.getElementById('brokerInfo');
-    const topicInfoEl  = document.getElementById('topicInfo');
-    const statusEl     = document.getElementById('status');
-    if (!window.DASHBOARD_CONFIG) {
-      statusEl.textContent = 'config.js not loaded (or DASHBOARD_CONFIG undefined)';
-      statusEl.style.color = '#dc3545';
-      brokerInfoEl.textContent = '(missing)';
-      topicInfoEl.textContent  = '(missing)';
-    } else {
-      brokerInfoEl.textContent = window.DASHBOARD_CONFIG.mqttUrl;
-      topicInfoEl.textContent  = window.DASHBOARD_CONFIG.topic;
-    }
-  </script>
+  <h1>HTML is being served ✅</h1>
+  <p>If you see this, GitHub Pages is rendering HTML from index.html.</p>
 </body>
 </html>
