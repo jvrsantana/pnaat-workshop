@@ -1,25 +1,14 @@
 
 /* global mqtt, DASHBOARD_CONFIG */
 
-// Elements
 const statusEl = document.getElementById('status');
 const brokerInfoEl = document.getElementById('brokerInfo');
-const topicInfoEl = document.getElementById('topicInfo');
+const topicInfoEl  = document.getElementById('topicInfo');
 const gridEl = document.getElementById('grid');
 
 let client;
-const state = {
-  tiles: {},   // id -> tile DOM & state
-  timers: {},  // id -> stale timeout
-};
 
-// ----- UI helpers -----
-function setStatus(text, ok = false) {
-  statusEl.textContent = text;
-  statusEl.style.color = ok ? '#198754' : '#dc3545';
-}
-
-// Build fixed tiles (13 stations)
+// Build tiles for fixed station IDs
 function initGrid() {
   gridEl.innerHTML = '';
   (DASHBOARD_CONFIG.expectedStations || []).forEach((id) => {
@@ -38,86 +27,83 @@ function initGrid() {
       </div>
     `;
     gridEl.appendChild(tile);
-    state.tiles[id] = {
-      el: tile,
-      bpmEl: tile.querySelector('.val'),
-      statusEl: tile.querySelector('.status'),
-      timeEl: tile.querySelector('.time'),
-      dotEl: tile.querySelector('.dot'),
-      lastTs: 0,
-    };
   });
 }
 
-function markStale(id) {
-  const t = state.tiles[id];
-  if (!t) return;
-  t.el.classList.add('stale');
-  t.statusEl.textContent = 'Stale';
-  t.dotEl.style.background = '#6c757d';
-}
-function scheduleStale(id) {
-  clearTimeout(state.timers[id]);
-  state.timers[id] = setTimeout(() => markStale(id), DASHBOARD_CONFIG.staleAfterMs);
+function setStatus(text, ok = false) {
+  statusEl.textContent = text;
+  statusEl.style.color = ok ? '#198754' : '#dc3545';
 }
 
-// Parse payloads like {"deviceId":"nano-001","hr_bpm":77}
+// Parse {"deviceId":"nano-001","hr_bpm":77}
 function parsePayload(buf) {
-  const text = buf.toString();
+  const txt = buf.toString();
   try {
-    const obj = JSON.parse(text);
+    const obj = JSON.parse(txt);
     if (obj && typeof obj.deviceId === 'string' && typeof obj.hr_bpm !== 'undefined') {
-      const bpmNum = Number(obj.hr_bpm);
-      if (!Number.isNaN(bpmNum)) return { id: obj.deviceId, bpm: bpmNum };
+      const bpm = Number(obj.hr_bpm);
+      if (!Number.isNaN(bpm)) return { id: obj.deviceId, bpm };
     }
   } catch (_) {}
-  // fallback formats, if needed:
-  const parts = text.split(/[,\s]+/);
-  if (parts.length >= 2) {
-    let id = parts[0].replace(/^(deviceId[:=])?/i, '');
-    let bpmStr = parts[1].replace(/^(hr_bpm[:=])?/i, '');
-    const bpm = Number(bpmStr);
-    if (id && !Number.isNaN(bpm)) return { id, bpm };
-  }
   return null;
 }
 
-// Update a tile
-function updateTile({ id, bpm }) {
-  const t = state.tiles[id];
-  if (!t) return;
+function markStale(id) {
+  const tile = document.getElementById(`tile-${id}`);
+  if (!tile) return;
+  tile.classList.add('stale');
+  tile.querySelector('.status').textContent = 'Stale';
+  tile.querySelector('.dot').style.background = '#6c757d';
+}
 
-  t.bpmEl.textContent = bpm.toFixed(0);
-  t.timeEl.textContent = new Date().toLocaleTimeString();
-  t.el.classList.remove('stale', 'ok', 'warn', 'bad');
+function scheduleStale(id) {
+  const timeoutMs = DASHBOARD_CONFIG.staleAfterMs || 15000;
+  // store as dataset to clear later if needed
+  const tile = document.getElementById(`tile-${id}`);
+  if (!tile) return;
+  const prev = tile.dataset.timerId;
+  if (prev) clearTimeout(Number(prev));
+  const timerId = setTimeout(() => markStale(id), timeoutMs);
+  tile.dataset.timerId = String(timerId);
+}
 
-  const { min: nMin, max: nMax } = DASHBOARD_CONFIG.bpmNormalRange;
-  const { min: wMin, max: wMax } = DASHBOARD_CONFIG.bpmWarnRange;
+function updateTile(id, bpm) {
+  const tile = document.getElementById(`tile-${id}`);
+  if (!tile) return;
+  const valEl = tile.querySelector('.val');
+  const statusEl = tile.querySelector('.status');
+  const dotEl = tile.querySelector('.dot');
+  const timeEl = tile.querySelector('.time');
 
-  if (bpm >= nMin && bpm <= nMax) {
-    t.el.classList.add('ok');
-    t.statusEl.textContent = 'Normal';
-    t.dotEl.style.background = '#198754';
-  } else if (bpm >= wMin && bpm <= wMax) {
-    t.el.classList.add('warn');
-    t.statusEl.textContent = 'Warning';
-    t.dotEl.style.background = '#ffc107';
+  valEl.textContent = bpm.toFixed(0);
+  timeEl.textContent = new Date().toLocaleTimeString();
+
+  const n = DASHBOARD_CONFIG.bpmNormalRange || { min: 50, max: 110 };
+  const w = DASHBOARD_CONFIG.bpmWarnRange || { min: 40, max: 130 };
+
+  tile.classList.remove('stale', 'ok', 'warn', 'bad');
+  if (bpm >= n.min && bpm <= n.max) {
+    tile.classList.add('ok');
+    statusEl.textContent = 'Normal';
+    dotEl.style.background = '#198754';
+  } else if (bpm >= w.min && bpm <= w.max) {
+    tile.classList.add('warn');
+    statusEl.textContent = 'Warning';
+    dotEl.style.background = '#ffc107';
   } else {
-    t.el.classList.add('bad');
-    t.statusEl.textContent = 'Out of range';
-    t.dotEl.style.background = '#dc3545';
+    tile.classList.add('bad');
+    statusEl.textContent = 'Out of range';
+    dotEl.style.background = '#dc3545';
   }
 
   scheduleStale(id);
 }
 
-// ----- AUTO-CONNECT on load + resilient retries -----
 function connectMqtt() {
   const { mqttUrl, options, topic } = DASHBOARD_CONFIG;
 
   brokerInfoEl.textContent = mqttUrl;
   topicInfoEl.textContent = topic;
-
   setStatus('Connecting…');
 
   client = mqtt.connect(mqttUrl, options);
@@ -133,18 +119,19 @@ function connectMqtt() {
   client.on('close', () => setStatus('Disconnected'));
   client.on('error', (err) => setStatus(`Error: ${err?.message || err}`));
 
-  client.on('message', (_topic, payload) => {
+  client.on('message', (t, payload) => {
+    // Print raw messages to the console for debugging
+    console.log('MQTT message:', t, payload?.toString());
     const parsed = parsePayload(payload);
-    if (parsed) updateTile(parsed);
+    if (parsed) updateTile(parsed.id, parsed.bpm);
   });
 }
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DASHBOARD_CONFIG) {
-    setStatus('config.js not loaded');
+    setStatus('config.js not loaded or DASHBOARD_CONFIG undefined');
     brokerInfoEl.textContent = '(missing)';
-    topicInfoEl.textContent  = '(missing)';
+    topicInfoEl.textContent = '(missing)';
     return;
   }
   initGrid();
