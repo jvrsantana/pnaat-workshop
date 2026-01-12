@@ -69,16 +69,34 @@ function scheduleStale(id) {
 }
 
 // ---- Message parsing (JSON preferred; CSV fallback) ----
+
 function parsePayload(buf) {
   const text = buf.toString();
-  // Try JSON: {"id":"station01","bpm":76}
+
+  // Formato oficial informado:
+  // {"deviceId":"nano-001","hr_bpm":77}
   try {
     const obj = JSON.parse(text);
-    if (obj && typeof obj.id === 'string' && typeof obj.bpm !== 'undefined') {
-      const bpmNum = Number(obj.bpm);
-      if (!Number.isNaN(bpmNum)) return { id: obj.id, bpm: bpmNum };
+    if (obj && typeof obj.deviceId === 'string' && typeof obj.hr_bpm !== 'undefined') {
+      const bpmNum = Number(obj.hr_bpm);
+      if (!Number.isNaN(bpmNum)) {
+        return { id: obj.deviceId, bpm: bpmNum };
+      }
     }
   } catch (_) {}
+
+  // Fallbacks (se aparecerem variações)
+  // Ex: "nano-001,77" ou "deviceId=nano-001,hr_bpm=77"
+  const parts = text.split(/[,\s]+/);
+  if (parts.length >= 2) {
+    let id = parts[0].replace(/^(deviceId[:=])?/i, '');
+    let bpmStr = parts[1].replace(/^(hr_bpm[:=])?/i, '');
+    const bpm = Number(bpmStr);
+    if (id && !Number.isNaN(bpm)) return { id, bpm };
+  }
+  return null;
+}
+
 
   // Try CSV or "id:...,bpm:..."
   // Examples: "station01,76"  |  "id=station01,bpm=76"
